@@ -62,13 +62,13 @@
 # Remove the exploded directory
 - name: CLEAN | Remove exploded application directory
   file:
-    path: "{{ tomcat_webapps }}/{{ app_name }}"
+    path: "{{ tomcat_webapps }}/{{ artifact_name }}"
     state: absent
 
 # Verify deletion
 - name: VERIFY | Check exploded directory removed
   stat:
-    path: "{{ tomcat_webapps }}/{{ app_name }}"
+    path: "{{ tomcat_webapps }}/{{ artifact_name }}"
   register: exploded_dir
 
 - name: FAIL | Exploded directory still exists

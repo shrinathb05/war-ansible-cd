@@ -1,0 +1,49 @@
+# Start Tomcat Service
+- name: START | Start Tomcat service
+  systemd:
+    name: "{{ tomcat_service }}"
+    state: started
+
+# Wait until service is active
+- name: WAIT | Wait until Tomcat is active
+  command: systemctl is-active {{ tomcat_service }}
+  register: tomcat_status
+
+  changed_when: false
+  failed_when: false
+
+  until: tomcat_status.stdout == "active"
+  retries: "{{ service_start_retries }}"
+  delay: "{{ service_start_delay }}"
+
+# Verify service
+- name: VERIFY | Fail if Tomcat did not start
+  fail:
+    msg: "Tomcat failed to start on {{ inventory_hostname }}"
+  when: tomcat_status.stdout != "active"
+
+# Wait for WAR extraction
+- name: WAIT | Wait for application extraction
+  stat:
+    path: "{{ tomcat_webapps }}/{{ artifact_name }}"
+      #state: present
+      #timeout: 30
+      #delay: 5
+  register: app_directory
+
+  until: app_directory.stat.exists
+
+  retries: "{{ war_extract_retries }}"
+  delay: "{{ war_extract_delay }}"
+
+# Debug path
+- name: DEBUG | Show expected path
+  debug:
+    msg: "{{ tomcat_webapps }}/{{ artifact_name }}"
+
+# Verify extraction/Directory
+- name: VERIFY | Application extracted
+  fail:
+    msg: "Application directory was not created."
+  when: not app_directory.stat.exists
+

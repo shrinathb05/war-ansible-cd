@@ -1,0 +1,11 @@
+---
+tomcat_service: tomcat
+tomcat_webapps: /home/tomcat/current/webapps
+
+artifact_name: 01-maven-web-app
+
+service_start_retries: 15
+service_start_delay: 2
+
+war_extract_retries: 20
+war_extract_delay: 3

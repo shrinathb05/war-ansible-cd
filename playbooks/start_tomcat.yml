@@ -1,0 +1,7 @@
+---
+- name: START TOMCAT
+  hosts: tomcat_servers
+  become: yes
+
+  roles:
+    - start_tomcat
