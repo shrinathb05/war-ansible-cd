@@ -19,21 +19,21 @@ pipeline {
             }
         }
 
-        stage('Inject Nexus Credentials') {
-            steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'nexus-credentials-id',
-                    usernameVariable: 'NEXUS_USER',
-                    passwordVariable: 'NEXUS_PASS'
-                )]) {
-                    sh '''
-                        echo "Credentials injected"
-                        export NEXUS_USERNAME=$NEXUS_USER
-                        export NEXUS_PASSWORD=$NEXUS_PASS
-                    '''
-                }
-            }
-        }
+        // stage('Inject Nexus Credentials') {
+        //     steps {
+        //         withCredentials([usernamePassword(
+        //             credentialsId: 'nexus-credentials-id',
+        //             usernameVariable: 'NEXUS_USER',
+        //             passwordVariable: 'NEXUS_PASS'
+        //         )]) {
+        //             sh '''
+        //                 echo "Credentials injected"
+        //                 export NEXUS_USERNAME=$NEXUS_USER
+        //                 export NEXUS_PASSWORD=$NEXUS_PASS
+        //             '''
+        //         }
+        //     }
+        // }
 
         stage('PRE-CHECK)') {
             steps {
@@ -53,13 +53,17 @@ pipeline {
             }
         }
 
-        stage('Post Deployment Health Check') {
+        stage('Download Artifacts') {
             steps {
-                sh '''
-                echo "Health check handled inside Ansible"
-                '''
+                sh """
+                    ansible-playbook playbooks/artifact_download.yml \
+                    -e nexus_username=$NEXUS_USER \
+                    -e nexus_password=$NEXUS_PASS \
+                    -e env=${params.ENV}
+                """
             }
         }
+
     }
 
     post {
