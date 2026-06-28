@@ -1,0 +1,23 @@
+# HTTP Health Check
+- name: HEALTH | Check application endpoint
+  uri:
+    url: "{{ health_check_url }}"
+    method: GET
+    status_code: "{{ expected_status }}"
+    return_content: no
+  register: health_result
+  retries: "{{ health_retries }}"
+  delay: "{{ health_delay }}"
+  until: health_result.status == expected_status
+
+# Debug Response
+- name: DEBUG | Health check response
+  debug:
+    msg: "Application is UP on {{ inventory_hostname }}"
+
+# Fail if unhealthy
+- name: FAIL | Application not healthy
+  fail:
+    msg: "Application failed health check on {{ inventory_hostname }}"
+  when: health_result.status != expected_status
+ 

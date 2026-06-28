@@ -1,0 +1,7 @@
+---
+- name: APP HEALTHCHECK
+  hosts: tomcat_servers
+  become: yes
+
+  roles:
+    - healthcheck

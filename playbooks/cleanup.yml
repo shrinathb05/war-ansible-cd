@@ -1,0 +1,7 @@
+---
+- name: CLEANUP AFTER DEPLOYMENT
+  hosts: tomcat_servers
+  become: yes
+
+  roles:
+    - cleanup

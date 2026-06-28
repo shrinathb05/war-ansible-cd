@@ -1,0 +1,13 @@
+# Remove WAR from control node
+- name: CLEANUP | Remove downloaded WAR from control node
+  file:
+    path: "{{ artifact_download_dir }}/{{ artifact_name }}.{{ artifact_extension }}"
+    state: absent
+  delegate_to: localhost
+  run_once: true
+
+# Clean Deployment Temp Area After Deployment
+- name: CLEANUP | Remove deployment temp files on servers
+  file:
+    path: "/home/tomcat/deployment"
+    state: absent

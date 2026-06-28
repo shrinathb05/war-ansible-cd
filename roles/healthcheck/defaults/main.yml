@@ -1,0 +1,10 @@
+---
+artifact_name: "01-maven-web-app"
+tomcat_port: 8080
+tomcat_host: "{{ inventory_hostname }}"
+
+health_check_url: "http://{{ tomcat_host }}:{{ tomcat_port }}/{{ artifact_name }}/"
+
+health_retries: 20
+health_delay: 5
+expected_status: 200

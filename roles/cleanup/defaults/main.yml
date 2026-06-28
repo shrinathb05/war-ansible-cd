@@ -1,0 +1,4 @@
+---
+artifact_download_dir: "/opt/deployment/tomcat-war-deployment/artifacts"
+artifact_name: "01-maven-web-app"
+artifact_extension: "war"
