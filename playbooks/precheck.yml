@@ -1,0 +1,7 @@
+---
+- name: PRECHECK RUN
+  hosts: tomcat_servers
+  become: yes
+
+  roles:
+    - precheck

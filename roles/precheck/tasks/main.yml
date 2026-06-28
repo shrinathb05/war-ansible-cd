@@ -1,0 +1,39 @@
+---
+- name: PRECHECK | Validate Tomcat service exists
+  shell: systemctl status "{{ tomcat_service }}"
+  register: tomcat_status
+  failed_when: tomcat_status.rc != 0
+  changed_when: false
+
+- name: PRECHECK | Check Java installation
+  command: java --version
+  register: java_check
+  failed_when: java_check.rc != 0
+  changed_when: false
+
+- name: PRECHECK | Validate Tomcat home directory
+  stat:
+    path: "{{ tomcat_home }}"
+  register: tomcat_home_check
+  failed_when: not tomcat_home_check.stat.exists
+
+- name: PRECHECK | Validate backup directory
+  stat:
+    path: "{{ backup_dir }}"
+  register: backup_check
+  failed_when: not backup_check.stat.exists
+
+- name: PRECHECK | Ensure deploy directory exists
+  stat:
+    path: "{{ tomcat_webapps }}"
+  register: webapps_check
+  failed_when: not webapps_check.stat.exists
+
+- name: PRECHECK | Check disk space (minimum 1GB required)
+  shell: df -h / | awk 'NR==2 {print $4}' | sed 's/G//'
+  register: disk_space
+
+- name: PRECHECK | Fail if disk space is low
+  fail:
+    msg: "❌ Insufficient disk space on {{ inventory_hostname }}"
+  when: disk_space.stdout | float < 1

@@ -1,0 +1,5 @@
+---
+tomcat_service: tomcat
+tomcat_home: /home/tomcat/current
+backup_dir: /home/tomcat/backups
+tomcat_webapps: /home/tomcat/current/webapps
