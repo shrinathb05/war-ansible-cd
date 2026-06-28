@@ -44,7 +44,7 @@ pipeline {
                 )]) {
 
                     sh """
-                    ansible-playbook playbook/ ansible-playbook playbooks/precheck.yml \
+                    ansible-playbook playbooks/precheck.yml \
                     -e nexus_username=$NEXUS_USER \
                     -e nexus_password=$NEXUS_PASS \
                     -e env=${params.ENV}
