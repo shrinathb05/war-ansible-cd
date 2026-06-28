@@ -1,0 +1,52 @@
+---
+- name: ROLLING DEPLOYMENT PIPELINE
+  hosts: tomcat_servers
+  become: yes
+
+  serial: 1   # 🔥 KEY FOR ROLLING DEPLOYMENT
+
+  vars:
+    app_name: "01-maven-web-app"
+
+  pre_tasks:
+
+    - name: PRECHECK ROLE
+      include_role:
+        name: precheck
+
+  tasks:
+
+    - name: ARTIFACT DOWNLOAD ROLE
+      include_role:
+        name: artifact_download
+
+    - name: BACKUP ROLE
+      include_role:
+        name: deploy_backup
+
+    - name: STOP TOMCAT ROLE
+      include_role:
+        name: stop_tomcat
+
+    - name: CLEAN OLD WAR
+      include_role:
+        name: cleanup
+
+    - name: DEPLOY WAR ROLE
+      include_role:
+        name: deploy_war
+
+    - name: START TOMCAT ROLE
+      include_role:
+        name: start_tomcat
+
+    - name: HEALTH CHECK ROLE
+      include_role:
+        name: healthcheck
+
+
+  post_tasks:
+
+    - name: SUCCESS LOG
+      debug:
+        msg: "Deployment successful on {{ inventory_hostname }}"
