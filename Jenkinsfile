@@ -13,37 +13,16 @@ pipeline {
 
     stages {
 
-        stage('Checkout Code') {
+        stage('Checkout & PRE-CHECK') {
             steps {
                 git branch: 'release', url: 'https://github.com/shrinathb05/war-ansible-cd.git'
-            }
-        }
 
-        // stage('Inject Nexus Credentials') {
-        //     steps {
-        //         withCredentials([usernamePassword(
-        //             credentialsId: 'nexus-credentials-id',
-        //             usernameVariable: 'NEXUS_USER',
-        //             passwordVariable: 'NEXUS_PASS'
-        //         )]) {
-        //             sh '''
-        //                 echo "Credentials injected"
-        //                 export NEXUS_USERNAME=$NEXUS_USER
-        //                 export NEXUS_PASSWORD=$NEXUS_PASS
-        //             '''
-        //         }
-        //     }
-        // }
-
-        stage('PRE-CHECK)') {
-            steps {
-                    sh """
+                sh """
                     ansible-playbook playbooks/precheck.yml \
                     -e nexus_username=$NEXUS_USER \
                     -e nexus_password=$NEXUS_PASS \
                     -e env=${params.ENV}
-                    """
-                }
+                """
             }
         }
 
@@ -54,15 +33,21 @@ pipeline {
                     usernameVariable: 'NEXUS_USER',
                     passwordVariable: 'NEXUS_PASS'
                 )]) {
-                sh """
-                    ansible-playbook playbooks/artifact_download.yml \
-                    -e nexus_username=$NEXUS_USER \
-                    -e nexus_password=$NEXUS_PASS \
-                    -e env=${params.ENV}
-                """
+                    sh '''
+                        echo "Credentials injected"
+                        export NEXUS_USERNAME=$NEXUS_USER
+                        export NEXUS_PASSWORD=$NEXUS_PASS
+                    '''
+                    sh """
+                        ansible-playbook playbooks/artifact_download.yml \
+                        -e nexus_username=$NEXUS_USER \
+                        -e nexus_password=$NEXUS_PASS \
+                        -e env=${params.ENV}
+                    """
+                }
             }
         }
-
+        
     }
 
     post {
