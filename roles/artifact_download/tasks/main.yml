@@ -1,0 +1,51 @@
+---
+- name: ARTIFACT | Fetch maven metadata
+  uri:
+    url: "{{ nexus_url }}/{{ group_id_path }}/maven-metadata.xml"
+    return_content: yes
+    force_basic_auth: yes
+    url_username: "{{ nexus_username }}"
+    url_password: "{{ nexus_password }}"
+  register: metadata
+
+- name: ARTIFACT | Extract latest version
+  set_fact:
+    latest_version: "{{ metadata.content | regex_findall('<release>(.*?)</release>') | last }}"
+
+- name: ARTIFACT | Show latest version
+  debug:
+    msg: "Latest version detected: {{ latest_version }}"
+
+- name: ARTIFACT | Build WAR download URL
+  set_fact:
+    war_url: >-
+      {{ nexus_url }}/{{ group_id_path }}/{{ latest_version }}/{{ artifact_name }}-{{ latest_version }}.{{ artifact_extension }}
+
+# Create download directory
+- name: ARTIFACT | Create artifact directory
+  file:
+    path: "{{ download_dir }}"
+    state: directory
+    mode: '0755'
+
+# Download WAR
+- name: ARTIFACT | Download WAR from Nexus
+  get_url:
+    url: "{{ war_url }}"
+    dest: "{{ download_dir }}/{{ artifact_name }}.{{ artifact_extension }}"
+    mode: '0644'
+    url_username: "{{ nexus_username }}"
+    url_password: "{{ nexus_password }}"
+    force_basic_auth: yes
+
+# Verify download
+- name: ARTIFACT | Verify WAR exists
+  stat:
+    path: "{{ download_dir }}/{{ artifact_name }}.{{ artifact_extension }}"
+  register: war_file
+
+- name: ARTIFACT | Fail if WAR missing
+  fail:
+    msg: "WAR download failed!"
+  when: not war_file.stat.exists
+

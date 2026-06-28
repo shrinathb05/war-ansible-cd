@@ -39,3 +39,7 @@ health_check_delay: 5
 checksum_algorithm: sha256
 
 ####################################################################################
+# Nexus Credentials
+####################################################################################
+nexus_username: admin
+nexus_password: $Shrin@th@025

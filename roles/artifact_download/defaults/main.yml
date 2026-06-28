@@ -1,0 +1,11 @@
+---
+nexus_url: "http://10.78.57.131:8081/repository/maven-releases/"
+group_id_path: "in/ashokit/01-maven-web-app"
+artifact_name: "01-maven-web-app"
+artifact_extension: "war"
+download_dir: "{{ artifact_download_dir }}"
+artifact_download_dir: /opt/deployment/tomcat-war-deployment/artifacts
+
+# Nexus credentials
+nexus_username: admin
+nexus_password: $Shrin@th@025
