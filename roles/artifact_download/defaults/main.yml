@@ -8,4 +8,4 @@ artifact_download_dir: /opt/deployment/tomcat-war-deployment/artifacts
 
 # Nexus credentials
 nexus_username: admin
-nexus_password: $Shrin@th@025
+nexus_password: pass
