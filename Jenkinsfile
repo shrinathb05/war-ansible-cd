@@ -16,7 +16,11 @@ pipeline {
         stage('Checkout & PRE-CHECK') {
             steps {
                 git branch: 'release', url: 'https://github.com/shrinathb05/war-ansible-cd.git'
+            }
+        }
 
+        stage('PRE-CHECK') {
+            steps {
                 sh """
                     ansible-playbook playbooks/precheck.yml \
                     -e nexus_username=$NEXUS_USER \
@@ -33,11 +37,11 @@ pipeline {
                     usernameVariable: 'NEXUS_USER',
                     passwordVariable: 'NEXUS_PASS'
                 )]) {
-                    sh '''
-                        echo "Credentials injected"
-                        export NEXUS_USERNAME=$NEXUS_USER
-                        export NEXUS_PASSWORD=$NEXUS_PASS
-                    '''
+                    // sh '''
+                    //     echo "Credentials injected"
+                    //     export NEXUS_USERNAME=$NEXUS_USER
+                    //     export NEXUS_PASSWORD=$NEXUS_PASS
+                    // '''
                     sh """
                         ansible-playbook playbooks/artifact_download.yml \
                         -e nexus_username=$NEXUS_USER \
