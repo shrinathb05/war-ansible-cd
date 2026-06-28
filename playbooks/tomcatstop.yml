@@ -1,8 +1,8 @@
 ---
-- name: BACKUP + STOP TOMCAT
+- name: STOP TOMCAT
   hosts: tomcat_servers
   become: yes
   gather_facts: yes
 
   roles:
-    - backup
+    - tomcat_stop

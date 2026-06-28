@@ -1,0 +1,9 @@
+---
+backup_dir: /home/tomcat/backups
+tomcat_service: tomcat
+#app_name: 01-maven-web-app
+artifact_name: 01-maven-web-app
+artifact_extension: war
+tomcat_webapps: /home/tomcat/current/webapps
+backup_timestamp: "{{ lookup('pipe', 'date +%Y_%m_%d:%H_%M_%S') }}"
+war_file: "{{ artifact_name }}.{{ artifact_extension }}"

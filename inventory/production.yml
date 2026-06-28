@@ -6,11 +6,11 @@ all:
         tomcat-app-01:
           ansible_host: 10.78.57.88
 
-        tomcat-app-02:
-          ansible_host: 10.78.57.209
+        #tomcat-app-02:
+        # ansible_host: 10.78.57.209
 
-        tomcat-app-03:
-          ansible_host: 10.78.57.66
+        #tomcat-app-03:
+        #  ansible_host: 10.78.57.66
 
       vars:
         ansible_user: ubuntu

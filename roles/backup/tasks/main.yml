@@ -1,0 +1,22 @@
+# Check current WAR exists
+- name: BACKUP | Check existing WAR
+  stat:
+    path: "{{ tomcat_webapps }}/{{ war_file }}"
+  register: existing_war
+
+- name: BACKUP | Create backup directory
+  file:
+    path: "{{ backup_dir }}/{{ inventory_hostname }}"
+    state: directory
+    mode: 0755
+
+# Backup existing WAR
+- name: BACKUP | Backup existing WAR
+  copy:
+    src: "{{ tomcat_webapps }}/{{ war_file }}"
+    dest: "{{ backup_dir }}/{{ inventory_hostname }}/{{ war_file }}.{{ backup_timestamp }}"
+    remote_src: yes
+  when: existing_war.stat.exists
+
+
+
