@@ -1,0 +1,8 @@
+---
+- name: BACKUP + STOP TOMCAT
+  hosts: tomcat_servers
+  become: yes
+  gather_facts: yes
+
+  roles:
+    - deploy_backup

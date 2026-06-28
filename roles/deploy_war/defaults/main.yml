@@ -1,0 +1,7 @@
+---
+artifact_name: 01-maven-web-app
+artifact_extension: war
+
+local_artifact_path: "/opt/deployment/tomcat-war-deployment/artifacts"
+
+tomcat_webapps: "/home/tomcat/current/webapps"

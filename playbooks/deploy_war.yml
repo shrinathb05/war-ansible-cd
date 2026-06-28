@@ -1,0 +1,8 @@
+---
+- name: DEPLOY WAR TO TOMCAT SERVERS
+  hosts: tomcat_servers
+  become: yes 
+  gather_facts: yes
+
+  roles:
+    - deploy_war

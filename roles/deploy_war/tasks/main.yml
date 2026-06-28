@@ -1,0 +1,58 @@
+# Copy WAR to servers
+- name: DEPLOY | Copy WAR to Tomcat servers
+  copy:
+    src: "{{ local_artifact_path }}/{{ artifact_name }}.{{ artifact_extension }}"
+    dest: "{{ tomcat_webapps }}/{{ artifact_name }}.{{ artifact_extension }}"
+    mode: '0644'
+
+# Verify file exists
+- name: VERIFY | Check WAR deployed
+  stat:
+    path: "{{ tomcat_webapps }}/{{ artifact_name }}.{{ artifact_extension }}"
+  register: war_check
+
+- name: FAIL | If WAR missing
+  fail:
+    msg: "WAR deployment failed on {{ inventory_hostname }}"
+  when: not war_check.stat.exists
+
+# Set correct permissions
+- name: PERMISSION | Fix ownership
+  file:
+    path: "{{ tomcat_webapps }}/{{ artifact_name }}.{{ artifact_extension }}"
+    owner: tomcat
+    group: tomcat
+    mode: '0644'
+
+# Validate checksum
+- name: CHECKSUM | Calculate deployed WAR checksum
+  stat:
+    path: "{{ tomcat_webapps }}/{{ artifact_name }}.{{ artifact_extension }}"
+    checksum_algorithm: sha256
+  register: deployed_checksum
+
+- name: DEBUG | Show checksum
+  debug:
+    msg: "Deployed checksum: {{ deployed_checksum.stat.checksum }}"
+
+# Validate source checksum
+- name: CHECKSUM | Source WAR checksum
+  stat:
+    path: "{{ local_artifact_path }}/{{ artifact_name }}.{{ artifact_extension }}"
+    checksum_algorithm: sha256
+  register: source_checksum
+  delegate_to: localhost
+  run_once: true
+
+- name: DEBUG | Show Source checksum
+  ansible.builtin.debug:
+    msg: "Source checksum: {{ source_checksum.stat.checksum }}"
+
+# Compare checksum
+- name: VALIDATE | Compare checksums
+  fail:
+    msg: "Checksum mismatch on {{ inventory_hostname }}"
+  when: >
+    deployed_checksum.stat.checksum | default('') !=
+    source_checksum.stat.checksum | default('')
+
