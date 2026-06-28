@@ -37,12 +37,6 @@ pipeline {
 
         stage('PRE-CHECK)') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'nexus-credentials-id',
-                    usernameVariable: 'NEXUS_USER',
-                    passwordVariable: 'NEXUS_PASS'
-                )]) {
-
                     sh """
                     ansible-playbook playbooks/precheck.yml \
                     -e nexus_username=$NEXUS_USER \
@@ -55,6 +49,11 @@ pipeline {
 
         stage('Download Artifacts') {
             steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'nexus-credentials-id',
+                    usernameVariable: 'NEXUS_USER',
+                    passwordVariable: 'NEXUS_PASS'
+                )]) {
                 sh """
                     ansible-playbook playbooks/artifact_download.yml \
                     -e nexus_username=$NEXUS_USER \
