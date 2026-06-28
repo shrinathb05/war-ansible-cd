@@ -1,0 +1,57 @@
+# Stop Tomcat service
+- name: STOP | Stop Tomcat service
+  systemd:
+    name: "{{ tomcat_service }}"
+    state: stopped
+
+# Ensure WAR is removed (clean state)
+- name: CLEAN | Remove old WAR
+  file:
+    path: "{{ tomcat_webapps }}/{{ war_file }}"
+    state: absent
+# Vefiry WAR removal
+- name: VERIFY | Check WAR removed
+  stat:
+    path: "{{ tomcat_webapps }}/{{ war_file }}"
+  register: war_status
+
+- name: FAIL | WAR still exists
+  fail:
+    msg: "Old WAR file still exists."
+  when: war_status.stat.exists
+
+# Verify Tomcat is stopped
+- name: VERIFY | Check Tomcat is stopped
+  shell: systemctl is-active "{{ tomcat_service }}"
+  register: tomcat_state
+  failed_when: tomcat_state.stdout == "active"
+  changed_when: false
+    
+# Waiting
+- name: WAIT | Wait until Tomcat service is inactive
+  command: systemctl is-active {{ tomcat_service }}
+  register: service_status
+
+  failed_when: false
+  changed_when: false
+
+  until: service_status.stdout == "inactive"
+  retries: 10
+  delay: 2
+
+# Remove the exploded directory
+- name: CLEAN | Remove exploded application directory
+  file:
+    path: "{{ tomcat_webapps }}/{{ artifact_name }}"
+    state: absent
+
+# Verify deletion
+- name: VERIFY | Check exploded directory removed
+  stat:
+    path: "{{ tomcat_webapps }}/{{ artifact_name }}"
+  register: exploded_dir
+
+- name: FAIL | Exploded directory still exists
+  fail:
+    msg: "Exploded application directory still exists."
+  when: exploded_dir.stat.exists
