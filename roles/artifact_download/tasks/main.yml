@@ -49,3 +49,121 @@
     msg: "WAR download failed!"
   when: not war_file.stat.exists
 
+
+# =========================================
+# 1. FETCH MAVEN METADATA
+# =========================================
+
+- name: ARTIFACT | Fetch maven metadata
+  uri:
+    url: "{{ nexus_url }}/{{ group_id_path }}/maven-metadata.xml"
+    return_content: yes
+    force_basic_auth: yes
+    url_username: "{{ nexus_username }}"
+    url_password: "{{ nexus_password }}"
+  register: metadata
+
+
+# =========================================
+# 2. EXTRACT ALL VERSIONS (IMPORTANT FIX)
+# =========================================
+
+- name: ARTIFACT | Extract all versions
+  set_fact:
+    versions_list: "{{ metadata.content | regex_findall('<version>(.*?)</version>') | sort }}"
+
+
+# =========================================
+# 3. SET LATEST & PREVIOUS VERSION
+# =========================================
+
+- name: ARTIFACT | Set version strategy
+  set_fact:
+    latest_version: "{{ versions_list[-1] }}"
+    previous_version: "{{ versions_list[-2] }}"
+
+
+# =========================================
+# 4. DEBUG VERSION INFO
+# =========================================
+
+- name: ARTIFACT | Show versions
+  debug:
+    msg:
+      - "Latest version: {{ latest_version }}"
+      - "Previous version: {{ previous_version }}"
+
+
+# =========================================
+# 5. BUILD DOWNLOAD URL (LATEST)
+# =========================================
+
+- name: ARTIFACT | Build latest WAR URL
+  set_fact:
+    latest_war_url: >-
+      {{ nexus_url }}/{{ group_id_path }}/{{ latest_version }}/{{ artifact_name }}-{{ latest_version }}.{{ artifact_extension }}
+
+
+# =========================================
+# 6. BUILD DOWNLOAD URL (PREVIOUS - ROLLBACK READY)
+# =========================================
+
+- name: ARTIFACT | Build previous WAR URL
+  set_fact:
+    previous_war_url: >-
+      {{ nexus_url }}/{{ group_id_path }}/{{ previous_version }}/{{ artifact_name }}-{{ previous_version }}.{{ artifact_extension }}
+
+
+# =========================================
+# 7. CREATE DOWNLOAD DIRECTORY
+# =========================================
+
+- name: ARTIFACT | Create artifact directory
+  file:
+    path: "{{ download_dir }}"
+    state: directory
+    mode: '0755'
+
+
+# =========================================
+# 8. DOWNLOAD LATEST WAR
+# =========================================
+
+- name: ARTIFACT | Download latest WAR
+  get_url:
+    url: "{{ latest_war_url }}"
+    dest: "{{ download_dir }}/{{ artifact_name }}-{{ latest_version }}.war"
+    mode: '0644'
+    force_basic_auth: yes
+    url_username: "{{ nexus_username }}"
+    url_password: "{{ nexus_password }}"
+
+
+# =========================================
+# 9. DOWNLOAD PREVIOUS WAR (ROLLBACK READY)
+# =========================================
+
+- name: ARTIFACT | Download previous WAR
+  get_url:
+    url: "{{ previous_war_url }}"
+    dest: "{{ download_dir }}/{{ artifact_name }}-{{ previous_version }}.war"
+    mode: '0644'
+    force_basic_auth: yes
+    url_username: "{{ nexus_username }}"
+    url_password: "{{ nexus_password }}"
+
+
+# =========================================
+# 10. VERIFY LATEST WAR
+# =========================================
+
+- name: ARTIFACT | Verify latest WAR exists
+  stat:
+    path: "{{ download_dir }}/{{ artifact_name }}-{{ latest_version }}.war"
+  register: latest_war_file
+
+
+- name: ARTIFACT | Fail if latest WAR missing
+  fail:
+    msg: "Latest WAR download failed!"
+  when: not latest_war_file.stat.exists
